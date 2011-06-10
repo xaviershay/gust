@@ -10,6 +10,12 @@ class PostingAFileTest < AcceptanceTest
     end
 
     assert_has_file_with_content session, 'fixing.diff', '> hello'
+
+    session.instance_eval do
+      click_link "Permalink"
+    end
+
+    assert_has_file_with_content session, 'fixing.diff', '> hello'
   end
 
   def assert_has_file_with_content(session, filename, content)

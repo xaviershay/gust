@@ -1,5 +1,9 @@
 module Views
   class NewGust
+    def initialize(data)
+      @data = data
+    end
+
     def render
       <<-HTML
         <!DOCTYPE html>
@@ -9,7 +13,7 @@ module Views
           </head>
           <body>
             <h1>Gust!</h1>
-            <form action='/gusts' method='post'>
+            <form action='/gusts/#{@data[:id]}' method='post'>
               <p>
                 <label for='filename'>
                   Filename

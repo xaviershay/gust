@@ -19,6 +19,7 @@ module Views
           </head>
           <body>
             <h1>Gust!</h1>
+            <p><a href="/gusts/#{@data[:gust_id]}">Permalink</a></p>
       HTML
 
       @data[:files].each do |file|
