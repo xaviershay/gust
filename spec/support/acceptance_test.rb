@@ -11,7 +11,7 @@ class AcceptanceTest < MiniTest::Unit::TestCase
   attr_reader :session
 
   def max_run_time
-    0.2
+    0.25
   end
 
   # Paths
