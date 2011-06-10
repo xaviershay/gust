@@ -12,7 +12,7 @@ module Views
 
     def content
       html = <<-HTML
-        <section>
+        <section id='upload'>
           <h2>Make One</h2>
         <form action='/gusts/#{@data[:id]}' method='post'>
       HTML

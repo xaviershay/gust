@@ -11,6 +11,7 @@ module Views
     def content
       buffer = <<-HTML
         <p><a href="/gusts/#{@data[:gust_id]}">Permalink</a></p>
+        <section id='upload'>
       HTML
 
       @data[:files].each do |file|
@@ -20,6 +21,7 @@ module Views
         HTML
       end
 
+      buffer += '</section>'
       buffer
     end
   end

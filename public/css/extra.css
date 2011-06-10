@@ -12,3 +12,19 @@ textarea {
   height: 300px;
   font-family: monospace;
 }
+
+a {
+  text-decoration: none;
+}
+
+#upload {
+  width: 40em;
+}
+
+h2 a {
+  font-size: 50%;
+}
+
+pre {
+  overflow: scroll;
+}
