@@ -10,23 +10,8 @@ module Views
         <html>
           <head>
             <title>Gust!</title>
-            <link href="http://hax/styles.css" media="screen" rel="stylesheet" type="text/css" />
-            <style>
-              label {
-                display: block;
-                font-weight: bold;
-              }
-
-              input[type=text] {
-                width: 100%;
-                font-family: monospace;
-              }
-              textarea {
-                width: 100%;
-                height: 300px;
-                font-family: monospace;
-              }
-            </style>
+            <link href="/css/base.css"  media="screen" rel="stylesheet" type="text/css" />
+            <link href="/css/extra.css" media="screen" rel="stylesheet" type="text/css" />
           </head>
           <body>
             <header>
