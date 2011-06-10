@@ -10,10 +10,31 @@ module Views
         <html>
           <head>
             <title>Gust!</title>
+            <link href="http://hax/styles.css" media="screen" rel="stylesheet" type="text/css" />
+            <style>
+              label {
+                display: block;
+                font-weight: bold;
+              }
+
+              input[type=text] {
+                width: 100%;
+                font-family: monospace;
+              }
+              textarea {
+                width: 100%;
+                height: 300px;
+                font-family: monospace;
+              }
+            </style>
           </head>
           <body>
-            <h1>Gust!</h1>
+            <header>
+              <h1>Gust!</h1>
+            </header>
+            <article>
             #{content}
+            </article>
           </body>
         </html>
       HTML

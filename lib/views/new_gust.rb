@@ -12,6 +12,8 @@ module Views
 
     def content
       html = <<-HTML
+        <section>
+          <h2>Make One</h2>
         <form action='/gusts/#{@data[:id]}' method='post'>
       HTML
 
@@ -24,23 +26,25 @@ module Views
       end
 
       html += <<-HTML
-        <p>
+        <ol>
+        <li>
           <label for='filename'>
             Filename
           </label>
-          <input id='filename' name='filename' />
-        </p>
+          <input id='filename' name='filename' type='text' />
+        </li>
 
-        <p>
+        <li>
           <label for='content'>
             File
           </label>
-          <textarea id='content' name='content'>
-          </textarea>
-        </p>
+          <textarea id='content' name='content'></textarea>
+        </li>
+        </ol>
 
         <input type='submit' value='Gust!' />
       </form>
+      </section>
       HTML
 
       html
