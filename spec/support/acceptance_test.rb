@@ -24,4 +24,9 @@ class AcceptanceTest < MiniTest::Unit::TestCase
     assert session.has_content?(content),
       "Page did not have content \"#{content}\". Was\n\n#{session.body}"
   end
+
+  def assert_has_no_content(session, content)
+    assert session.has_no_content?(content),
+      "Page had content \"#{content}\". Was\n\n#{session.body}"
+  end
 end

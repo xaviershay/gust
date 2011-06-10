@@ -16,6 +16,13 @@ class PostingAFileTest < AcceptanceTest
     end
 
     assert_has_file_with_content session, 'fixing.diff', '> hello'
+
+    session.instance_eval do
+      click_link "Raw"
+    end
+
+    assert_has_no_content session, "Gust"
+    assert_has_content    session, "> hello"
   end
 
   def test_with_validation_errors

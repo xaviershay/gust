@@ -16,7 +16,9 @@ module Views
 
       @data[:files].each do |file|
         buffer += <<-HTML
-          <h2>#{escape_html(file.filename)}</h2>
+          <h2>#{escape_html(file.filename)}
+          <a href='/gusts/#{@data[:gust_id]}/#{escape_html(file.filename)}'>Raw</a>
+          </h2>
           <div><pre>#{escape_html(file.content)}</pre></div>
         HTML
       end
