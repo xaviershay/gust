@@ -1,4 +1,5 @@
 require 'parallel'
+require 'gust_application'
 
 class AcceptanceRunner < MiniTest::Unit
   def initialize(opts = {})
@@ -56,7 +57,7 @@ class AcceptanceRunner < MiniTest::Unit
   alias_method :_run_suites, :_run_suites_in_parallel
 
   def session
-    @session ||= Capybara::Session.new(:webkit, Gust.new).tap(&:driver)
+    @session ||= Capybara::Session.new(:rack_test, GustApplication.new).tap(&:driver)
   end
 
   def coverage?
