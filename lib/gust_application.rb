@@ -74,7 +74,8 @@ class GustApplication
       response = Rack::Response.new(view.render)
       response.finish
     else
-      # TODO
+      response = Rack::Response.new(["NOT FOUND"], 404)
+      response.finish
     end
   end
 end
