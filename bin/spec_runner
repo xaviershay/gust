@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+ARGV.each do |file|
+  require_relative File.join("..", file)
+end

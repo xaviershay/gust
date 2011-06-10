@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+COVERAGE=1 rake spec:unit
+COVERAGE=1 RESET_COVERAGE=0 rake spec:integration
+COVERAGE=1 RESET_COVERAGE=0 rake spec:acceptance
+rake quality
