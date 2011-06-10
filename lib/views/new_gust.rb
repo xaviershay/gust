@@ -6,6 +6,7 @@ module Views
 
     def initialize(data)
       @data = data
+      @data[:recent] ||= []
       @data[:errors] ||= {}
       @data[:errors][:filename] ||= []
     end
@@ -24,6 +25,10 @@ module Views
           </p>
         HTML
       end
+
+      recent_gusts = @data[:recent].map do |gust|
+        "<li><a href='/gusts/#{gust.id}'>#{gust.files[0].filename}</a></li>"
+      end.join("\n")
 
       html += <<-HTML
         <ol>
@@ -44,6 +49,12 @@ module Views
 
         <input type='submit' value='Gust!' />
       </form>
+      </section>
+      <section>
+        <h2>Recent</h2>
+        <ol>
+          #{recent_gusts}
+        </ol>
       </section>
       HTML
 

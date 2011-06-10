@@ -17,17 +17,18 @@ class GustApplication
 
     gust_regex = %r{/gusts/([0-9a-f]{32})$}
     gust_file_regex = %r{/gusts/([0-9a-f]{32})/(.+)$}
+    repository = GustRepository.new(@config.repository_root)
 
     if request.path_info == '/'
       view = Views::NewGust.new(
-        id: Digest::MD5.hexdigest([Time.now, rand].join)
+        id: Digest::MD5.hexdigest([Time.now, rand].join),
+        recent: repository.recent(10)
       )
       response = Rack::Response.new(view.render)
       response.finish
     elsif request.path_info =~ gust_file_regex
       id = request.path_info[gust_file_regex, 1]
       filename = request.path_info[gust_file_regex, 2]
-      repository = GustRepository.new(@config.repository_root)
       gust = repository.find(id)
 
       file = gust.files.detect {|x| x.filename == filename }
@@ -35,10 +36,8 @@ class GustApplication
       response = Rack::Response.new(file.content)
       response.headers['Content-Type'] = 'text/plain'
       response.finish
-      
     elsif request.path_info =~ gust_regex
       id = request.path_info[gust_regex, 1]
-      repository = GustRepository.new(@config.repository_root)
       errors = {}
 
       if request.post? || request.put?

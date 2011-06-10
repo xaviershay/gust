@@ -4,14 +4,18 @@ require 'tmpdir'
 require 'gust_repository'
 
 class GustRepositoryTest < IntegrationTest
-  def test_create_and_update_new_repository_that_does_not_exist
-    temp_dir = Dir.mktmpdir
+  def setup
+    super
+    @temp_dir = Dir.mktmpdir
+  end
 
-    repository = GustRepository.new(temp_dir)
+  def test_create_and_update_new_repository_that_does_not_exist
+
+    repository = GustRepository.new(@temp_dir)
 
     gust = repository.find_or_create("new_repo")
 
-    dir = "#{temp_dir}/new_repo"
+    dir = "#{@temp_dir}/new_repo"
 
     assert_git_repository dir
     assert_equal [], Dir["#{dir}/*"]
@@ -34,8 +38,26 @@ class GustRepositoryTest < IntegrationTest
     assert_equal 1, gust.files.length, "Number of files"
     assert_equal 'test.txt', gust.files[0].filename
     assert_equal 'HELLO',    gust.files[0].content
-  ensure
-    FileUtils.remove_entry_secure temp_dir if temp_dir
+  end
+
+  def test_recent_repositories
+    repository = GustRepository.new(@temp_dir)
+
+    gusts = [
+      repository.find_or_create("a"),
+      repository.find_or_create("b"),
+      repository.find_or_create("c")
+    ]
+
+    assert_equal [
+      gusts[2],
+      gusts[1]
+    ], repository.recent(2)
+  end
+
+  def teardown
+    FileUtils.remove_entry_secure @temp_dir if @temp_dir
+    super
   end
 
   def assert_git_repository(path)

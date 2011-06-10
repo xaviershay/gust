@@ -1,6 +1,10 @@
 require 'ostruct'
 
 class Gust < Struct.new(:directory)
+  def id
+    File.basename(directory)
+  end
+
   def files
     Dir.chdir(directory) do
       Dir["*"].map do |file|

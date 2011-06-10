@@ -4,6 +4,9 @@ class Configuration
   end
 
   def repository_root
-    "/tmp/gust"
+    {
+      "development" => "/tmp/gust",
+      "test"        => "/tmp/gust_test",
+    }.fetch(@env)
   end
 end
