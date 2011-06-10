@@ -18,6 +18,17 @@ class PostingAFileTest < AcceptanceTest
     assert_has_file_with_content session, 'fixing.diff', '> hello'
   end
 
+  def test_with_validation_errors
+    session.instance_eval do
+      visit '/'
+      fill_in 'Filename', with: ''
+      fill_in 'File',     with: ''
+      click_button 'Gust!'
+    end
+
+    assert_has_content session, "Filename must not be blank"
+  end
+
   def assert_has_file_with_content(session, filename, content)
     assert_has_content session, filename
     assert_has_content session, content

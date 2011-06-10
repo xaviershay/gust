@@ -2,10 +2,12 @@ module Views
   class NewGust
     def initialize(data)
       @data = data
+      @data[:errors] ||= {}
+      @data[:errors][:filename] ||= []
     end
 
     def render
-      <<-HTML
+      html = <<-HTML
         <!DOCTYPE html>
         <html>
           <head>
@@ -14,6 +16,17 @@ module Views
           <body>
             <h1>Gust!</h1>
             <form action='/gusts/#{@data[:id]}' method='post'>
+      HTML
+
+      if @data[:errors][:filename].include?(:blank)
+        html += <<-HTML
+              <p class='errors'>
+                Filename must not be blank
+              </p>
+        HTML
+      end
+
+      html += <<-HTML
               <p>
                 <label for='filename'>
                   Filename
@@ -34,6 +47,8 @@ module Views
           </body>
         </html>
       HTML
+
+      html
     end
   end
 end

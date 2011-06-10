@@ -26,25 +26,38 @@ class GustApplication
     elsif request.path_info =~ gust_regex
       id = request.path_info[gust_regex, 1]
       repository = GustRepository.new(@config.repository_root)
+      errors = {}
 
       if request.post? || request.put?
-        gust = repository.find_or_create(id)
-        gust.update([
-          filename: request.params["filename"].to_s.gsub(/[^a-z0-9_\-\.]/i, '-'),
-          content:  request.params["content"]
-        ])
+        filename = request.params["filename"].to_s.gsub(/[^a-z0-9_\-\.]/i, '-')
 
-        response = Rack::Response.new
-        response.redirect("/gusts/#{id}")
-        response.finish
+        if filename.length == 0
+          errors[:filename] ||= []
+          errors[:filename] << :blank
+        end
+
+        if errors.empty?
+          gust = repository.find_or_create(id)
+          gust.update([
+            filename: filename,
+            content:  request.params["content"]
+          ])
+        end
       else
         gust = repository.find(id)
       end
 
-      view = Views::ShowGust.new(
-        files:   gust.files,
-        gust_id: id
-      )
+      if gust
+        view = Views::ShowGust.new(
+          files:   gust.files,
+          gust_id: id
+        )
+      else
+        view = Views::NewGust.new(
+          id:     id,
+          errors: errors
+        )
+      end
       response = Rack::Response.new(view.render)
       response.finish
     else
