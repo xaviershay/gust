@@ -49,7 +49,7 @@ task :benchmark do
   require 'benchmark'
 
   time = Benchmark.realtime {
-    `ruby -Ilib -risolate/now -rgust -e ''`
+    `ruby -Ilib -risolate/now -rgust_application -e ''`
   }
   puts "Startup Time\t#{time}"
 end
