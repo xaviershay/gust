@@ -40,6 +40,21 @@ class GustRepositoryTest < IntegrationTest
     assert_equal 'HELLO',    gust.files[0].content
   end
 
+  def test_does_not_recreate_repository_if_it_already_exists
+    repository = GustRepository.new(@temp_dir)
+
+    gust1 = repository.find_or_create("new_repo")
+    gust1.update([{
+      filename: 'test.txt',
+      content:  'HELLO'
+    }])
+    gust2 = repository.find_or_create("new_repo")
+
+    assert_equal gust1, gust2
+    dir = "#{@temp_dir}/new_repo"
+    assert_commit_count dir, 1
+  end
+
   def test_recent_repositories
     repository = GustRepository.new(@temp_dir)
 

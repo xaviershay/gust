@@ -1,4 +1,5 @@
 require 'gust'
+require 'grit'
 
 class GustRepository
   def initialize(repository_root)
@@ -12,12 +13,7 @@ class GustRepository
 
   def find_or_create(name)
     dir = File.join(@repository_root, name)
-    unless File.directory?(dir)
-      `mkdir #{dir}`
-      Dir.chdir(dir) do
-        `git init`
-      end
-    end
+    Grit::Repo.init(dir)
 
     Gust.new(dir)
   end

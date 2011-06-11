@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'grit'
 
 class Gust < Struct.new(:directory)
   def id
@@ -6,13 +7,11 @@ class Gust < Struct.new(:directory)
   end
 
   def files
-    Dir.chdir(directory) do
-      Dir["*"].map do |file|
-        OpenStruct.new(
-          filename: file,
-          content:  File.read(file)
-        )
-      end
+    repo.commits.first.tree.contents.map do |blob|
+      OpenStruct.new(
+        filename: blob.name,
+        content:  blob.data
+      )
     end
   end
 
@@ -22,9 +21,16 @@ class Gust < Struct.new(:directory)
         File.open(file[:filename], "w") do |f|
           f.write(file[:content])
         end
+        repo.add(file[:filename])
       end
-      `git add --all`
-      `git commit -m 'via web'`
     end
+
+    repo.commit_index('via web')
+  end
+
+  private
+
+  def repo
+    @repo ||= Grit::Repo.new(directory)
   end
 end
