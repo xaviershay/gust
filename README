@@ -1,3 +1,14 @@
 This is a gist clone because RailsCamp has no internetz.
 
 Also it doesn't use any of your damn frameworks.
+
+== Developing
+
+    gem install shotgun
+    shotgun # Serves app on localhost:9393, with autoreload
+
+    rake # Runs a full build
+ 
+Please note:
+* I'm pretty opiniated about the structure of this app, so talk to me before you do any refactorings otherwise I'll probably reject them.
+* `rake` must pass on EVERY commit. No temporary commits. Keep everything working.
