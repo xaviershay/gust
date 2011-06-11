@@ -30,6 +30,8 @@ class Router
   attr_reader :config, :routes
 
   def respond(code, description)
-    Rack::Response.new([description], code)
+    Rack::Response.new([description], code).tap do |response|
+      response.headers['Content-Type'] = 'text/plain'
+    end
   end
 end
