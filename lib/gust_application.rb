@@ -1,4 +1,5 @@
 require 'configuration'
+require 'router'
 require 'controllers/gust'
 
 require 'digest/sha1'
@@ -11,36 +12,21 @@ class GustApplication
   end
 
   def call(env)
-    request = Rack::Request.new(env)
-    gust_controller = Controllers::Gust.new(@config, request.params)
+    router.process(Rack::Request.new(env)).finish
+  end
 
-    routes = {
+  def router
+    @router ||= Router.new(@config,
       %r{^/$} => {
-        'GET' => [gust_controller, :new]
+        'GET' => [Controllers::Gust, :new]
       },
       %r{^/gusts/([0-9a-f]{32})$} => {
-        'GET'  => [gust_controller, :show],
-        'POST' => [gust_controller, :put]
+        'GET'  => [Controllers::Gust, :show],
+        'POST' => [Controllers::Gust, :put]
       },
       %r{^/gusts/([0-9a-f]{32})/(.+)$} => {
-        'GET' => [gust_controller, :raw]
+        'GET' => [Controllers::Gust, :raw]
       }
-    }
-
-    route = routes.detect {|regex, _|
-      request.path_info.match(regex)
-    }
-
-    response = if route
-      action = route[1][request.request_method]
-      if action
-        action[0].send(action[1], *request.path_info.match(route[0]).captures)
-      else
-        # TODO
-      end
-    else
-       Rack::Response.new(["NOT FOUND"], 404)
-    end
-    response.finish
+    )
   end
 end
