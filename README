@@ -12,3 +12,12 @@ Also it doesn't use any of your damn frameworks.
 Please note:
 * I'm pretty opiniated about the structure of this app, so talk to me before you do any refactorings otherwise I'll probably reject them.
 * `rake` must pass on EVERY commit. No temporary commits. Keep everything working.
+
+If Isolate tries to reinstall gems on every request, you need to patch the gem:
+
+    # lib/isolate/sandbox.rb
+    212c212
+    <         !e.specification && e.matches?(environment)
+    ---
+    >         not e.specification && e.matches?(environment)
+
