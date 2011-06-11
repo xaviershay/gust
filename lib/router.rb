@@ -18,14 +18,18 @@ class Router
         controller = action[0].new(config, request.params)
         controller.send(action[1], *request.path_info.match(route[0]).captures)
       else
-        Rack::Response.new(["NOT ACCEPTABLE"], 406)
+        respond(406, "NOT ACCEPTABLE")
       end
     else
-       Rack::Response.new(["NOT FOUND"], 404)
+      respond(404, "NOT FOUND")
     end
   end
 
   private
 
   attr_reader :config, :routes
+
+  def respond(code, description)
+    Rack::Response.new([description], code)
+  end
 end
