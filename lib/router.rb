@@ -45,9 +45,8 @@ class Router
   end
 
   def compile(routes)
-    routes.inject({}) do |new_routes, (path, mappings)|
-      new_routes[Regexp.new("^%s$" % path)] = mappings
-      new_routes
-    end
+    Hash[routes.map {|path, mappings|
+      [Regexp.new("^%s$" % path), mappings]
+    }]
   end
 end
