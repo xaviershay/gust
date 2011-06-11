@@ -5,7 +5,7 @@ class RecentGustsTest < AcceptanceTest
   def setup
     super
     @config = Configuration.new('test')
-    FileUtils.rm_rf(@config.repository_root + '/*')
+    FileUtils.rm_rf Dir[@config.repository_root + '/*']
   end
 
   def test_can_see_recent_gusts
