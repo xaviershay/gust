@@ -1,3 +1,5 @@
+require 'rack/response'
+
 class Router
   def initialize(config, routes)
     @config = config
@@ -16,7 +18,7 @@ class Router
         controller = action[0].new(config, request.params)
         controller.send(action[1], *request.path_info.match(route[0]).captures)
       else
-        # TODO
+        Rack::Response.new(["NOT ACCEPTABLE"], 406)
       end
     else
        Rack::Response.new(["NOT FOUND"], 404)
