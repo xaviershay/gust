@@ -59,6 +59,7 @@ module Controllers
       else
         Views::NewGust.new(
           id:     id,
+          recent: repository.recent(10),
           errors: errors
         )
       end
