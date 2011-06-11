@@ -1,7 +1,6 @@
 require_relative '../spec_helper'
 
 require 'capybara'
-require 'capybara-webkit'
 
 require 'acceptance_runner'
 require 'acceptance_test'
