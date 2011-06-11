@@ -1,6 +1,5 @@
 require 'configuration'
-require 'views/new_gust'
-require 'views/show_gust'
+require 'controllers/gust'
 require 'gust_repository'
 
 require 'digest/sha1'
@@ -19,13 +18,8 @@ class GustApplication
     gust_file_regex = %r{/gusts/([0-9a-f]{32})/(.+)$}
     repository = GustRepository.new(@config.repository_root)
 
-    if request.path_info == '/'
-      view = Views::NewGust.new(
-        id: Digest::MD5.hexdigest([Time.now, rand].join),
-        recent: repository.recent(10)
-      )
-      response = Rack::Response.new(view.render)
-      response.finish
+    response = if request.path_info == '/'
+      Controllers::Gust.new(@config, request.params).new
     elsif request.path_info =~ gust_file_regex
       id = request.path_info[gust_file_regex, 1]
       filename = request.path_info[gust_file_regex, 2]
@@ -35,46 +29,18 @@ class GustApplication
 
       response = Rack::Response.new(file.content)
       response.headers['Content-Type'] = 'text/plain'
-      response.finish
+      response
     elsif request.path_info =~ gust_regex
       id = request.path_info[gust_regex, 1]
-      errors = {}
 
       if request.post? || request.put?
-        filename = request.params["filename"].to_s.gsub(/[^a-z0-9_\-\.]/i, '-')
-
-        if filename.length == 0
-          errors[:filename] ||= []
-          errors[:filename] << :blank
-        end
-
-        if errors.empty?
-          gust = repository.find_or_create(id)
-          gust.update([
-            filename: filename,
-            content:  request.params["content"]
-          ])
-        end
+        Controllers::Gust.new(@config, request.params).put(id)
       else
-        gust = repository.find(id)
+        Controllers::Gust.new(@config, request.params).show(id)
       end
-
-      if gust
-        view = Views::ShowGust.new(
-          files:   gust.files,
-          gust_id: id
-        )
-      else
-        view = Views::NewGust.new(
-          id:     id,
-          errors: errors
-        )
-      end
-      response = Rack::Response.new(view.render)
-      response.finish
     else
-      response = Rack::Response.new(["NOT FOUND"], 404)
-      response.finish
+       Rack::Response.new(["NOT FOUND"], 404)
     end
+    response.finish
   end
 end
