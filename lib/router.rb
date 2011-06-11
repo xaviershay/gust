@@ -1,6 +1,10 @@
 require 'rack/response'
 
 class Router
+  METHODS    = 1
+  CONTROLLER = 0
+  METHOD     = 1
+
   def initialize(config, routes)
     @config = config
     @routes = compile(routes)
@@ -8,15 +12,13 @@ class Router
 
   # Returns a `Rack::Response`
   def process(request)
-    route = routes.detect {|regex, _|
-      request.path_info.match(regex)
-    }
+    route, params = match_route(request.path_info)
 
-    response = if route
-      action = route[1][request.request_method]
+    if route
+      action = route[METHODS][request.request_method]
       if action
-        controller = action[0].new(config, request.params)
-        controller.send(action[1], *request.path_info.match(route[0]).captures)
+        controller = action[CONTROLLER].new(config, request.params)
+        controller.send(action[METHOD], *params)
       else
         respond(406, "NOT ACCEPTABLE")
       end
@@ -33,6 +35,13 @@ class Router
     Rack::Response.new([description], code).tap do |response|
       response.headers['Content-Type'] = 'text/plain'
     end
+  end
+
+  def match_route(path)
+    params = nil
+    [routes.detect {|regex, _|
+      params = path.match(regex)
+    }, params ? params.captures : nil]
   end
 
   def compile(routes)
