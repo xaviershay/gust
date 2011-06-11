@@ -1,3 +1,4 @@
+require 'gust_repository'
 require 'views/new_gust'
 require 'views/show_gust'
 
@@ -13,7 +14,7 @@ module Controllers
         id: Digest::MD5.hexdigest([Time.now, rand].join),
         recent: repository.recent(10)
       )
-      response = Rack::Response.new(view.render)
+      Rack::Response.new(view.render)
     end
 
     def show(id)
@@ -22,7 +23,17 @@ module Controllers
         files:   gust.files,
         gust_id: id
       )
-      response = Rack::Response.new(view.render)
+      Rack::Response.new(view.render)
+    end
+
+    def raw(id, filename)
+      gust = repository.find(id)
+
+      file = gust.files.detect {|x| x.filename == filename }
+
+      response = Rack::Response.new(file.content)
+      response.headers['Content-Type'] = 'text/plain'
+      response
     end
 
     def put(id)
@@ -53,7 +64,7 @@ module Controllers
           errors: errors
         )
       end
-      response = Rack::Response.new(view.render)
+      Rack::Response.new(view.render)
     end
 
     private
