@@ -10,20 +10,18 @@ module Controllers
     end
 
     def new
-      view = Views::NewGust.new(
+      render Views::NewGust.new(
         id: Digest::MD5.hexdigest([Time.now, rand].join),
         recent: repository.recent(10)
       )
-      Rack::Response.new(view.render)
     end
 
     def show(id)
       gust = repository.find(id)
-      view = Views::ShowGust.new(
+      render Views::ShowGust.new(
         files:   gust.files,
         gust_id: id
       )
-      Rack::Response.new(view.render)
     end
 
     def raw(id, filename)
@@ -53,18 +51,19 @@ module Controllers
         ])
       end
 
-      if gust
-        view = Views::ShowGust.new(
+      view = if gust
+        Views::ShowGust.new(
           files:   gust.files,
           gust_id: id
         )
       else
-        view = Views::NewGust.new(
+        Views::NewGust.new(
           id:     id,
           errors: errors
         )
       end
-      Rack::Response.new(view.render)
+
+      render view
     end
 
     private
@@ -74,5 +73,10 @@ module Controllers
     def repository
       @repository ||= GustRepository.new(@config.repository_root)
     end
+
+    def render(view)
+      Rack::Response.new(view.render)
+    end
+
   end
 end
