@@ -12,22 +12,32 @@ class GustApplication
 
   def call(env)
     request = Rack::Request.new(env)
+    gust_controller = Controllers::Gust.new(@config, request.params)
 
-    gust_regex      = %r{^/gusts/([0-9a-f]{32})$}
-    gust_file_regex = %r{^/gusts/([0-9a-f]{32})/(.+)$}
-    home_regex      = %r{^/$}
+    routes = {
+      %r{^/$} => {
+        'GET' => [gust_controller, :new]
+      },
+      %r{^/gusts/([0-9a-f]{32})$} => {
+        'GET'  => [gust_controller, :show],
+        'POST' => [gust_controller, :put]
+      },
+      %r{^/gusts/([0-9a-f]{32})/(.+)$} => {
+        'GET' => [gust_controller, :raw]
+      }
+    }
 
-    response = if request.path_info == '/' && request.get?
-      Controllers::Gust.new(@config, request.params).new
-    elsif request.path_info =~ gust_file_regex
-      matches = request.path_info.match(gust_file_regex).captures
-      Controllers::Gust.new(@config, request.params).raw(*matches)
-    elsif request.path_info =~ gust_regex && (request.post? || request.put?)
-      matches = request.path_info.match(gust_regex).captures
-      Controllers::Gust.new(@config, request.params).put(*matches)
-    elsif request.path_info =~ gust_regex && request.get?
-      matches = request.path_info.match(gust_regex).captures
-      Controllers::Gust.new(@config, request.params).show(*matches)
+    route = routes.detect {|regex, _|
+      request.path_info.match(regex)
+    }
+
+    response = if route
+      action = route[1][request.request_method]
+      if action
+        action[0].send(action[1], *request.path_info.match(route[0]).captures)
+      else
+        # TODO
+      end
     else
        Rack::Response.new(["NOT FOUND"], 404)
     end
