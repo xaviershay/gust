@@ -17,14 +17,14 @@ class GustApplication
 
   def router
     @router ||= Router.new(@config,
-      %r{^/$} => {
+      '/' => {
         'GET' => [Controllers::Gust, :new]
       },
-      %r{^/gusts/([0-9a-f]{32})$} => {
+      '/gusts/([0-9a-f]{32})' => {
         'GET'  => [Controllers::Gust, :show],
         'POST' => [Controllers::Gust, :put]
       },
-      %r{^/gusts/([0-9a-f]{32})/(.+)$} => {
+      '/gusts/([0-9a-f]{32})/(.+)' => {
         'GET' => [Controllers::Gust, :raw]
       }
     )

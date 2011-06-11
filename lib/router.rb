@@ -3,7 +3,7 @@ require 'rack/response'
 class Router
   def initialize(config, routes)
     @config = config
-    @routes = routes
+    @routes = compile(routes)
   end
 
   # Returns a `Rack::Response`
@@ -32,6 +32,13 @@ class Router
   def respond(code, description)
     Rack::Response.new([description], code).tap do |response|
       response.headers['Content-Type'] = 'text/plain'
+    end
+  end
+
+  def compile(routes)
+    routes.inject({}) do |new_routes, (path, mappings)|
+      new_routes[Regexp.new("^%s$" % path)] = mappings
+      new_routes
     end
   end
 end
