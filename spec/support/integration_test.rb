@@ -4,6 +4,6 @@ class IntegrationTest < MiniTest::Unit::TestCase
   include EnforceMaxRunTime
 
   def max_run_time
-    0.1
+    0.2
   end
 end
