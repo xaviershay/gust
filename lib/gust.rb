@@ -1,5 +1,6 @@
 require 'ostruct'
 require 'grit'
+require "gust_file"
 
 class Gust < Struct.new(:directory)
   def id
@@ -8,10 +9,7 @@ class Gust < Struct.new(:directory)
 
   def files
     repo.commits.first.tree.contents.map do |blob|
-      OpenStruct.new(
-        filename: blob.name,
-        content:  blob.data
-      )
+      GustFile.new(blob.name, blob.data)
     end
   end
 
