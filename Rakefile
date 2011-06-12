@@ -47,14 +47,37 @@ task :quality do
   end
 end
 
+desc "Run nonfunctional checks. Requires `rake benchmark` to have been run."
+task :nonfunctional do
+  startup_time = 0.5
+
+  results = File.read("out/benchmarks.tsv").lines.map {|x| x.split(/\t+/) }
+  time = results.detect {|x| x[0] == 'Startup Time' }[1].to_f
+  failures = []
+
+  if time > startup_time
+    failures << "  startup time too high: #{time} > #{startup_time}"
+  end
+  unless failures.empty?
+    puts
+    puts "Non-functional requirements not met:"
+    puts failures
+    exit 1
+  end
+end
+
 desc "Run benchmarks"
 task :benchmark do
   require 'benchmark'
+  require 'fileutils'
 
   time = Benchmark.realtime {
     `ruby -Ilib -risolate/now -rgust_application -e ''`
   }
-  puts "Startup Time\t#{time}"
+  output = "Startup Time\t#{time}"
+  FileUtils.mkdir_p("out")
+  File.open("out/benchmarks.tsv", "w") {|f| f.puts output }
+  puts output
 end
 
 task default: :build
