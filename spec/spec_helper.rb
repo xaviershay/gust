@@ -11,6 +11,10 @@ if ENV["COVERAGE"]
     add_filter '/tmp/'
     add_filter '/spec/'
   end
+  SimpleCov.at_exit do
+    SimpleCov.result
+  end
+
 end
 
 $LOAD_PATH.unshift(File.expand_path("../support", __FILE__))

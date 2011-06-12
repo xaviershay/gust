@@ -1,8 +1,28 @@
 #!/bin/bash
 set -e
+echo
+echo "===== Unit"
+echo
 COVERAGE=1 rake spec:unit
+echo
+echo "===== Integration"
+echo
 COVERAGE=1 RESET_COVERAGE=0 rake spec:integration
+echo
+echo "===== Acceptance"
+echo
 COVERAGE=1 RESET_COVERAGE=0 rake spec:acceptance
+echo
+echo "===== Artifacts"
+echo
+rake coverage_report
+echo
+echo "===== Benchmarks"
+echo
 rake benchmark
 rake nonfunctional
+echo
+echo "===== Quality"
+echo
 rake quality
+echo

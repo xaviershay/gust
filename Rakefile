@@ -16,16 +16,25 @@ task :build do
   exec('bin/build')
 end
  
+task :coverage_report do
+  require 'isolate/now'
+  require 'simplecov'
+
+  SimpleCov.result.format!
+end
 desc "Ensure that various code quality metrics are met"
 task :quality do
   coverage_threshold = 100
   ratio_threshold    = (0.0..1.5) # Don't care for now
   failures           = []
+  metrics            = []
 
   # NFI why this doesn't work on 1.9.2
   if RUBY_VERSION >= '1.9.3'
+    require 'isolate/now'
     require 'simplecov'
     coverage = SimpleCov::ResultMerger.merged_result.covered_percent 
+    metrics << "Coverage\t%i%" % coverage
     if coverage < coverage_threshold
       failures << "  Coverage % too low:           #{coverage} < #{coverage_threshold}"
     end
@@ -34,10 +43,13 @@ task :quality do
   code_loc = `cat lib/*.rb          | grep -v "#" | wc -l`.to_f
   spec_loc = `cat spec/**/*_spec.rb | grep -v "#" | wc -l`.to_f
   ratio    = spec_loc / code_loc
+  metrics << "Code:Spec ratio\t%.2f" % ratio
 
   unless ratio_threshold.cover?(ratio)
-    failures << "  code:spec ratio out of range: #{ratio.round(2)} not in #{ratio_threshold}"
+    failures << "  Code:Spec ratio out of range: #{ratio.round(2)} not in #{ratio_threshold}"
   end
+
+  puts metrics.join("\n")
 
   unless failures.empty?
     puts
@@ -56,7 +68,7 @@ task :nonfunctional do
   failures = []
 
   if time > startup_time
-    failures << "  startup time too high: #{time} > #{startup_time}"
+    failures << "  Startup time too high: #{time} > #{startup_time}"
   end
   unless failures.empty?
     puts
