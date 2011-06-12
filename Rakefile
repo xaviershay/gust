@@ -20,8 +20,27 @@ task :coverage_report do
   require 'isolate/now'
   require 'simplecov'
 
+  class MyFormatter < SimpleCov::Formatter::HTMLFormatter
+    # TODO: Split up upstream so just the output can be overriden
+    def format(result)
+      Dir[File.join(File.dirname(__FILE__), '../assets/*')].each do |path|
+        FileUtils.cp_r(path, asset_output_path)
+      end
+
+      File.open(File.join(output_path, "index.html"), "w+") do |file|
+        file.puts template('layout').result(binding)
+      end
+      puts "Coverage report generated at #{output_path[FileUtils.pwd.length+1..-1]}/index.html for:"
+      puts result.command_name.split(', ').map {|x| '  ' + x.split(' ', 2).last }
+      puts
+      puts "#{result.covered_lines} / #{result.total_lines} LOC (#{result.covered_percent.round(2)}%) covered."
+    end
+  end
+
+  SimpleCov.formatter = MyFormatter
   SimpleCov.result.format!
 end
+
 desc "Ensure that various code quality metrics are met"
 task :quality do
   coverage_threshold = 100
