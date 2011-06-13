@@ -16,16 +16,44 @@ task :build do
   exec('bin/build')
 end
  
+task :coverage_report do
+  require 'isolate/now'
+  require 'simplecov'
+
+  class MyFormatter < SimpleCov::Formatter::HTMLFormatter
+    # TODO: Split up upstream so just the output can be overriden
+    def format(result)
+      Dir[File.join(File.dirname(__FILE__), '../assets/*')].each do |path|
+        FileUtils.cp_r(path, asset_output_path)
+      end
+
+      File.open(File.join(output_path, "index.html"), "w+") do |file|
+        file.puts template('layout').result(binding)
+      end
+      puts "Coverage report generated at #{output_path[FileUtils.pwd.length+1..-1]}/index.html for:"
+      puts result.command_name.split(', ').map {|x| '  ' + x.split(' ', 2).last }
+      puts
+      puts "#{result.covered_lines} / #{result.total_lines} LOC (#{result.covered_percent.round(2)}%) covered."
+    end
+  end
+
+  SimpleCov.formatter = MyFormatter
+  SimpleCov.result.format!
+end
+
 desc "Ensure that various code quality metrics are met"
 task :quality do
   coverage_threshold = 100
   ratio_threshold    = (0.0..1.5) # Don't care for now
   failures           = []
+  metrics            = []
 
   # NFI why this doesn't work on 1.9.2
   if RUBY_VERSION >= '1.9.3'
+    require 'isolate/now'
     require 'simplecov'
     coverage = SimpleCov::ResultMerger.merged_result.covered_percent 
+    metrics << "Coverage\t%i%" % coverage
     if coverage < coverage_threshold
       failures << "  Coverage % too low:           #{coverage} < #{coverage_threshold}"
     end
@@ -34,10 +62,13 @@ task :quality do
   code_loc = `cat lib/*.rb          | grep -v "#" | wc -l`.to_f
   spec_loc = `cat spec/**/*_spec.rb | grep -v "#" | wc -l`.to_f
   ratio    = spec_loc / code_loc
+  metrics << "Code:Spec ratio\t%.2f" % ratio
 
   unless ratio_threshold.cover?(ratio)
-    failures << "  code:spec ratio out of range: #{ratio.round(2)} not in #{ratio_threshold}"
+    failures << "  Code:Spec ratio out of range: #{ratio.round(2)} not in #{ratio_threshold}"
   end
+
+  puts metrics.join("\n")
 
   unless failures.empty?
     puts
@@ -47,14 +78,37 @@ task :quality do
   end
 end
 
+desc "Run nonfunctional checks. Requires `rake benchmark` to have been run."
+task :nonfunctional do
+  startup_time = 0.5
+
+  results = File.read("out/benchmarks.tsv").lines.map {|x| x.split(/\t+/) }
+  time = results.detect {|x| x[0] == 'Startup Time' }[1].to_f
+  failures = []
+
+  if time > startup_time
+    failures << "  Startup time too high: #{time} > #{startup_time}"
+  end
+  unless failures.empty?
+    puts
+    puts "Non-functional requirements not met:"
+    puts failures
+    exit 1
+  end
+end
+
 desc "Run benchmarks"
 task :benchmark do
   require 'benchmark'
+  require 'fileutils'
 
   time = Benchmark.realtime {
     `ruby -Ilib -risolate/now -rgust_application -e ''`
   }
-  puts "Startup Time\t#{time}"
+  output = "Startup Time\t#{time}"
+  FileUtils.mkdir_p("out")
+  File.open("out/benchmarks.tsv", "w") {|f| f.puts output }
+  puts output
 end
 
 task default: :build
